@@ -5,7 +5,7 @@ const createMessage = async (message) => {
 }; 
 
 const listMessage = async () => {
-  (await connection()).collection('messages').find().toarray();
+  await (await connection()).collection('messages').find().toarray();
 }; 
 
 module.exports = { 

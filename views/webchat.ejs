@@ -8,21 +8,66 @@
   <title>Project Webchat</title>
 </head>
 <body>
+  <ul id="users"></ul>
   <ul id="messages"></ul>
-  <form action="">
-    <input id="messageInput" autocomplete="off" /><button>Send</button>
+
+  <form action="" id="nicknameForm">
+    <input type="text "id="nicknameInput" placeholder="enter nickname here" data-testid="nickname-box" />
+    <button type="submit" id="nicknameButton" data-testid="nickname-button">Save Nickname</button>
+  </form>  
+
+  <form action="" id="messageForm">
+    <input type="text" id="messageInput" placeholder="your message goes here" autocomplete="off" data-testid="message-box" />
+    <button type="submit" id="messageButton" data-testid="send-button">Send</button>
   </form>
+
   <script>
     const socket = window.io();
-    const form = document.querySelector('form');
-    const inputMessage = document.querySelector('#messageInput');
+    const newNickname = "";
 
-    form.addEventListener('submit', (e) => {
+    // evento nickname
+    const nicknameForm = document.querySelector('#nicknameForm');
+    const nicknameInput = document.querySelector('#nicknameInput');
+    
+    nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      socket.emit('message', inputMessage.value);
-      inputMessage.value = '';
+      newNickname = nicknameInput.value;
+      socket.emit('nickname', nicknameInput.value);
+      nicknameInput.value = '';
       return false;
     });
+
+    // evento message box
+    const messageform = document.querySelector('#messageForm');
+    const messageInput = document.querySelector('#messageInput');
+
+    messageform.addEventListener('submit', (e) => {
+      e.preventDefault();
+      socket.emit('message', {
+        nickname: newNickname,
+        chatMessage: messageInput.value
+      });
+      messageInput.value = '';
+      return false;
+    });
+
+    // função para criar menssagem na tela
+    const messageBox = (message) => {
+    const messageUl = document.querySelector('#messages');
+    const newMessageli = document.createElement('li');
+
+    newMessageli.innerText = message;
+    newMessageli.setAttribute('data-testid', 'message');
+    messageUl.appendChild(newMessageli);
+    };
+
+    // evento socket para menssagens na tela
+    socket.on('message', (message) => messageBox(message));
+    socket.on('defaultNickname', (defaultNick) => newNickname = defaultNick);
+
+    // socket.on('messageHistory', (messages) => {
+    //   if (messages) messages.forEach((message) => messageBox(message));
+    // });
   </script>
 </body>
 </html> 
