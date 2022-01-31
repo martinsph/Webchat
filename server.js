@@ -27,8 +27,8 @@ const {
 io.on('connection', async (socket) => {
   console.log(`Usuário ${socket.id} conectou.`);
   
-  // const defaultNick = socket.id.slice(0, 16);
-  // socket.emit('defaultNickname', defaultNick);
+  const defaultNick = socket.id.slice(0, 16);
+  socket.emit('defaultNickname', defaultNick);
   
   // função para escutar as mensagens
   socket.on('message', async ({ nickname, chatMessage }) => {
@@ -36,14 +36,16 @@ io.on('connection', async (socket) => {
     // cria timestamp e objeto menssagem
     const timestamp = (new Date()).toLocaleString('pt-BR').replace(/\//g, '-');
     const message = { message: chatMessage, nickname, timestamp };
+
     // salva no banco de dados a menssagem
     await createMessage(message);
     const newMessage = `${timestamp} - ${nickname}: ${chatMessage}`;
+
     // emite nova menssagem para tela
     io.emit('message', newMessage);
   });
 
-  // função para desconectar
+  // mensagem desconectar
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectou.`);
   });

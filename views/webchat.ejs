@@ -8,7 +8,7 @@
   <title>Project Webchat</title>
 </head>
 <body>
-  <ul id="users"></ul>
+  <ul id="onlineUsers" data-testid="online-user"></ul>
   <ul id="messages"></ul>
 
   <form action="" id="nicknameForm">
@@ -23,7 +23,7 @@
 
   <script>
     const socket = window.io();
-    const newNickname = "";
+    let newNickname = "";
 
     // evento nickname
     const nicknameForm = document.querySelector('#nicknameForm');
@@ -32,7 +32,6 @@
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
       newNickname = nicknameInput.value;
-      socket.emit('nickname', nicknameInput.value);
       nicknameInput.value = '';
       return false;
     });
@@ -51,6 +50,16 @@
       return false;
     });
 
+    // função para criar lista de usuários na tela
+    const onlineUsersBox = (user) => {
+    const usersUl = document.querySelector('#onlineUsers');
+    const usersLi = document.createElement('li');
+
+    usersLi.innerText = user;
+    usersLi.setAttribute('data-testid', 'online-user');
+    usersUl.appendChild(usersLi);
+    };
+
     // função para criar menssagem na tela
     const messageBox = (message) => {
     const messageUl = document.querySelector('#messages');
@@ -63,11 +72,11 @@
 
     // evento socket para menssagens na tela
     socket.on('message', (message) => messageBox(message));
-    socket.on('defaultNickname', (defaultNick) => newNickname = defaultNick);
+    socket.on('defaultNickname', (defaultNick) => {
+      onlineUsersBox(defaultNick)
+      newNickname = defaultNick;
+    });
 
-    // socket.on('messageHistory', (messages) => {
-    //   if (messages) messages.forEach((message) => messageBox(message));
-    // });
   </script>
 </body>
 </html> 
