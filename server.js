@@ -17,16 +17,26 @@ const { createMessage, listMessage } = require('./models/message/message');
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+const onlineUserList = {};
+
+/* eslint-disable */
 io.on('connection', async (socket) => {
   console.log(`Usuário ${socket.id} conectou.`);
-  // envia nickname default para client
   const defaultNick = socket.id.slice(0, 16);
+  onlineUserList[socket.id] = defaultNick;
+
+  // envia nickname default para client
   socket.emit('defaultNickname', defaultNick);
+  io.emit('userConnect', onlineUserList);
+
+  socket.on('setNewNickname', ({ currentUser, newNickname }) => {
+    onlineUserList[currentUser] = newNickname;
+    io.emit('setNickname', onlineUserList);
+  });
+
   // envia chatHistory para client
-  const sendHistory = async () => {
-    const result = await listMessage();
-    // console.log(result);
-    return result;
+  const sendHistory = async () => { 
+    const result = await listMessage(); return result; 
   };
   socket.emit('chatHistory', await sendHistory());
   // função para escutar as mensagens
@@ -44,6 +54,8 @@ io.on('connection', async (socket) => {
   // mensagem desconectar
   socket.on('disconnect', () => {
     console.log(`Usuário ${socket.id} desconectou.`);
+    delete onlineUserList[socket.id];
+    io.emit('userDisconnect', onlineUserList);
   });
 });
 app.get('/', (_req, res) => {

@@ -8,30 +8,32 @@
   <title>Project Webchat</title>
 </head>
 <body>
-  <ul id="onlineUsers" data-testid="online-user"></ul>
+  <ul id="users"></ul>
   <ul id="messages"></ul>
 
   <form action="" id="nicknameForm">
     <input type="text "id="nicknameInput" placeholder="enter nickname here" data-testid="nickname-box" />
     <button type="submit" id="nicknameButton" data-testid="nickname-button">Save Nickname</button>
   </form>  
-
+  
   <form action="" id="messageForm">
     <input type="text" id="messageInput" placeholder="your message goes here" autocomplete="off" data-testid="message-box" />
     <button type="submit" id="messageButton" data-testid="send-button">Send</button>
   </form>
-
+  
   <script>
     const socket = window.io();
-    let newNickname = "";
-
+    const usersUl = document.querySelector('#users');
     // evento nickname
     const nicknameForm = document.querySelector('#nicknameForm');
     const nicknameInput = document.querySelector('#nicknameInput');
     
     nicknameForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      newNickname = nicknameInput.value;
+      const currentUser = socket.id;
+      const newNickname = nicknameInput.value;
+      sessionStorage.setItem('nickname', newNickname);
+      socket.emit('setNewNickname', { currentUser, newNickname });
       nicknameInput.value = '';
       return false;
     });
@@ -43,7 +45,7 @@
     messageform.addEventListener('submit', (e) => {
       e.preventDefault();
       socket.emit('message', {
-        nickname: newNickname,
+        nickname: sessionStorage.getItem('nickname'),
         chatMessage: messageInput.value
       });
       messageInput.value = '';
@@ -51,13 +53,17 @@
     });
 
     // função para criar lista de usuários na tela
-    const onlineUsersBox = (user) => {
-      const usersUl = document.querySelector('#onlineUsers');
-      const usersLi = document.createElement('li');
+    const onlineUsersBox = (users) => {
+      const usersList = Object.entries(users)
+      const currentUser = sessionStorage.getItem('nickname');
+      usersUl.innerHTML = `<li data-testid="online-user">${currentUser}</li>`;
+      usersList.forEach(([userId, nickname]) => {
+        console.log(nickname);
+        if(nickname !== currentUser) {
+          usersUl.innerHTML += `<li data-testid="online-user">${nickname}</li>`
+        }
+      })
 
-      usersLi.innerText = user;
-      usersLi.setAttribute('data-testid', 'online-user');
-      usersUl.appendChild(usersLi);
     };
 
     // função para criar menssagem na tela
@@ -85,9 +91,11 @@
 
     // evento socket para menssagens na tela
     socket.on('defaultNickname', (defaultNick) => {
-      onlineUsersBox(defaultNick)
-      newNickname = defaultNick;
+      sessionStorage.setItem('nickname', defaultNick)
     });
+    socket.on('userConnect', onlineUsersBox )
+    socket.on('userDisconnect', onlineUsersBox )
+    socket.on('setNickname', onlineUsersBox )
     socket.on('message', (message) => messageBox(message));
     socket.on('chatHistory', (chatHistory) => historyBox(chatHistory));
 
