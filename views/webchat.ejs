@@ -52,30 +52,44 @@
 
     // função para criar lista de usuários na tela
     const onlineUsersBox = (user) => {
-    const usersUl = document.querySelector('#onlineUsers');
-    const usersLi = document.createElement('li');
+      const usersUl = document.querySelector('#onlineUsers');
+      const usersLi = document.createElement('li');
 
-    usersLi.innerText = user;
-    usersLi.setAttribute('data-testid', 'online-user');
-    usersUl.appendChild(usersLi);
+      usersLi.innerText = user;
+      usersLi.setAttribute('data-testid', 'online-user');
+      usersUl.appendChild(usersLi);
     };
 
     // função para criar menssagem na tela
     const messageBox = (message) => {
-    const messageUl = document.querySelector('#messages');
-    const newMessageli = document.createElement('li');
+      const messageUl = document.querySelector('#messages');
+      const newMessageli = document.createElement('li');
 
-    newMessageli.innerText = message;
-    newMessageli.setAttribute('data-testid', 'message');
-    messageUl.appendChild(newMessageli);
+      newMessageli.innerText = message;
+      newMessageli.setAttribute('data-testid', 'message');
+      messageUl.appendChild(newMessageli);
+    };
+
+    // função para criar historico na tela
+    const historyBox = (chatHistory) => {
+      console.log(chatHistory);
+      const messageUl = document.querySelector('#messages');
+      chatHistory.forEach(({ message, nickname, timestamp }) => {
+        const newMessageli = document.createElement('li');
+        const newMessage = `${timestamp} - ${nickname}: ${message}`;
+        newMessageli.innerText = newMessage;
+        newMessageli.setAttribute('data-testid', 'message');
+        messageUl.appendChild(newMessageli);
+      });
     };
 
     // evento socket para menssagens na tela
-    socket.on('message', (message) => messageBox(message));
     socket.on('defaultNickname', (defaultNick) => {
       onlineUsersBox(defaultNick)
       newNickname = defaultNick;
     });
+    socket.on('message', (message) => messageBox(message));
+    socket.on('chatHistory', (chatHistory) => historyBox(chatHistory));
 
   </script>
 </body>
