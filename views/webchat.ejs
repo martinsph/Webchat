@@ -6,20 +6,179 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/socket.io/socket.io.js"></script>
   <title>Project Webchat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      /* border: 1px solid red; */
+    }
+    body {
+      min-height: 99vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #344557;
+      /* background-image: url(background1.jpg); */
+      background-image: url(http://sfwallpaper.com/images/background-images-for-websites-28.jpg);
+      background-size: cover;
+      position: relative;
+      justify-content: center;
+    }
+
+    #main-container {
+      display: flex;
+      padding: 0 10%;
+    }
+
+    #users-container {
+      display: flex;
+      flex-direction: column;
+      width: 20%;
+      padding: 0 1%;
+      border: 2px solid black;
+      border-radius: 5px;
+      overflow: auto;
+      margin-right: 1px;
+      background-color: rgb(214, 208, 208);
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.50)
+    }
+    
+    #users-container li {
+      padding-left: 20px;
+      padding-top: 10px;
+      list-style: none;
+    }
+    
+    #messages-container {
+      padding: 0 1%;
+      width: 80%;
+      height: 350px;
+      border: 2px solid black;
+      border-radius: 5px;
+      overflow: auto;
+      background-color: rgb(228, 220, 220);
+      margin-left: 15px;
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.50)
+
+    }
+    
+    #messages-container li {
+      list-style: none;
+      padding: 0.5%;
+    }
+
+    #buttons-container {
+      display: flex;
+      padding: 0 10%;
+
+    }
+
+    #nicknameForm {
+      display: flex;
+      flex-direction: column;
+      width: 20%;
+      padding: 0 1%;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #nicknameInput {
+      margin-top: 15px;
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.15)
+    }
+
+    #messageInput {
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.15)
+    }
+
+    #nicknameButton {
+      width: 100px;
+      margin-top: 10px;
+      font-weight: bold;
+      color:#fff;
+      text-decoration: none;
+      background-color: #429000;
+      /* -webkit-border-radius: 10px; */
+      border-radius: 10px;
+      /* -webkit-box-sizing: border-box; */
+      box-sizing: border-box;
+      border: 5px solid #429000;
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.15)
+    }
+
+    #nicknameButton:active{
+      position: relative;
+      top:3px;
+      left:2px;
+      box-shadow: 0px 0px;
+    }
+
+    #nicknameButton:hover{
+      background-color: #fff;
+      color:#429000;
+      font-weight: bold;
+    }
+
+    #messageButton {
+      width: 100px;
+      margin-left: 5px;
+      font-weight: bold;
+      color:#fff;
+      text-decoration: none;
+      background-color: #0675B8;
+      /* -webkit-border-radius: 10px; */
+      border-radius: 10px;
+      /* -webkit-box-sizing: border-box; */
+      box-sizing: border-box;
+      border: 5px solid #0675B8;
+      box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 0.15)
+    }
+
+    #messageButton:active{
+      position: relative;
+      top:3px;
+      left:2px;
+      box-shadow: 0px 0px;
+    }
+
+    #messageButton:hover{
+      background-color: #fff;
+      color:#0675B8;
+      font-weight: bold;
+    }
+
+    #messageForm {
+      display: flex;
+      padding-left: 1%;
+      margin-top: 15px;
+      width: 80%;
+    }
+
+  </style>
 </head>
 <body>
-  <ul id="users"></ul>
-  <ul id="messages"></ul>
+  <section id="main-container">
+    <section id="users-container">
+      <h3>Usuários Online</h3>
+      <ul id="users"></ul>
+    </section>
+    <section id="messages-container">
+      <ul id="messages"></ul>
+    </section>
+  </section>
+  <section id="buttons-container">
+      <form action="" id="nicknameForm">
+        <input type="text "id="nicknameInput" style="height:35%; border:2px solid black; border-radius: 5px;" 
+        placeholder="change nickname" data-testid="nickname-box" />
+        <button type="submit" id="nicknameButton" data-testid="nickname-button">Change Nickname</button>
+      </form>  
+      <form action="" id="messageForm">
+        <textarea type="text" id="messageInput" style="width:90%; border:2px solid black; border-radius: 5px;"
+        placeholder="...message" autocomplete="off" data-testid="message-box" rows="5" cols="80"></textarea>
+        <button type="submit" id="messageButton" data-testid="send-button">Send</button>
+      </form>
+  </section>
 
-  <form action="" id="nicknameForm">
-    <input type="text "id="nicknameInput" placeholder="enter nickname here" data-testid="nickname-box" />
-    <button type="submit" id="nicknameButton" data-testid="nickname-button">Save Nickname</button>
-  </form>  
-  
-  <form action="" id="messageForm">
-    <input type="text" id="messageInput" placeholder="your message goes here" autocomplete="off" data-testid="message-box" />
-    <button type="submit" id="messageButton" data-testid="send-button">Send</button>
-  </form>
   
   <script>
     const socket = window.io();
